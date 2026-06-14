@@ -34,3 +34,12 @@ def clean_augment(augment_id: str | None) -> str:
     name = re.sub(r"^TFT\d*_Augment_", "", augment_id)
     name = re.sub(r"^TFT\d*_", "", name)
     return _humanize(name)
+
+
+def clean_item(item_id: str | None) -> str:
+    # "TFT_Item_GargoyleStoneplate" -> "Gargoyle Stoneplate"
+    if not item_id:
+        return "?"
+    name = re.sub(r"^TFT\d*_Item_", "", item_id)
+    name = re.sub(r"^TFT\d*_", "", name)
+    return _humanize(name)

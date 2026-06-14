@@ -21,15 +21,18 @@ def parse_patch(game_version: str) -> str:
 
 
 def primary_trait(traits: list) -> str | None:
-    """덱 archetype 추정: 활성화된 특성 중 가장 높이 발현된 것을 주력으로 본다.
+    """덱 archetype 추정: 활성화된 시너지 특성 중 가장 높이 발현된 것을 주력으로 본다.
 
     style(브론즈<실버<골드<프리즘) -> tier_current -> num_units 순으로 비교.
+    유닛 1개짜리 고유 특성(legendary unique trait)은 덱 성격을 대표하지 못하므로
+    2유닛 이상 특성을 우선한다.
     """
     active = [t for t in (traits or []) if t.get("tier_current", 0) >= 1]
-    if not active:
+    synergy = [t for t in active if t.get("num_units", 0) >= 2] or active
+    if not synergy:
         return None
     best = max(
-        active,
+        synergy,
         key=lambda t: (
             t.get("style", 0),
             t.get("tier_current", 0),

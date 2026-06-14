@@ -42,17 +42,17 @@
 
   <div class="grid2">
     <section class="card">
-      <div class="card-head"><h2>증강 랭킹</h2><small>평균 등수 낮은 순</small></div>
+      <div class="card-head"><h2>아이템 랭킹</h2><small>평균 등수 낮은 순</small></div>
       <table>
-        <thead><tr><th>#</th><th>증강</th><th>표본</th><th>평균</th><th>순방률</th></tr></thead>
+        <thead><tr><th>#</th><th>아이템</th><th>표본</th><th>평균</th><th>순방률</th></tr></thead>
         <tbody>
-          {% for a in data.augments %}
+          {% for it in data.item_ranking %}
           <tr>
             <td class="rank">{{ loop.index }}</td>
-            <td class="name">{{ a.name }}</td>
-            <td>{{ a.count }}</td>
-            <td class="avg">{{ a.avg }}</td>
-            <td>{{ a.top4_rate }}%</td>
+            <td class="name">{{ it.name }}</td>
+            <td>{{ it.count }}</td>
+            <td class="avg">{{ it.avg }}</td>
+            <td>{{ it.top4_rate }}%</td>
           </tr>
           {% endfor %}
         </tbody>

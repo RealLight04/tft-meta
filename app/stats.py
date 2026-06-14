@@ -13,6 +13,13 @@ from . import names
 from .config import settings
 from .models import Participant
 
+# 전투 성능과 무관한 아이템(빈 가방, 컴포넌트)은 통계에서 제외한다.
+EXCLUDED_ITEM_MARKERS = ("EmptyBag", "Spatula", "FryingPan")
+
+
+def _is_real_item(item_id: str) -> bool:
+    return not any(marker in item_id for marker in EXCLUDED_ITEM_MARKERS)
+
 
 def current_patch(db: Session) -> str | None:
     """표본이 가장 많은 패치를 '현재 패치'로 본다."""
@@ -23,6 +30,23 @@ def current_patch(db: Session) -> str | None:
         .first()
     )
     return row[0] if row else None
+
+
+def deck_archetype(traits: list) -> str | None:
+    """저장된 traits(JSON)에서 덱 주력 특성을 재계산한다.
+
+    collector.primary_trait과 동일한 기준이지만 저장 포맷(name/tier/num/style)을 쓴다.
+    이미 수집된 데이터에도 개선된 로직을 적용하기 위해 통계 시점에 다시 계산한다.
+    """
+    active = [t for t in (traits or []) if (t.get("tier") or 0) >= 1]
+    synergy = [t for t in active if (t.get("num") or 0) >= 2] or active
+    if not synergy:
+        return None
+    best = max(
+        synergy,
+        key=lambda t: (t.get("style") or 0, t.get("tier") or 0, t.get("num") or 0),
+    )
+    return best.get("name")
 
 
 def _finalize(stats: dict, clean, min_n: int, limit: int) -> list:
@@ -50,7 +74,7 @@ def get_overview(db: Session, patch: str) -> dict:
         return {"count": 0, "sum": 0, "top4": 0, "win": 0}
 
     decks = defaultdict(new_bucket)
-    augments = defaultdict(new_bucket)
+    items = defaultdict(new_bucket)
     units = defaultdict(new_bucket)
 
     def add(bucket, placement):
@@ -63,20 +87,22 @@ def get_overview(db: Session, patch: str) -> dict:
 
     for p in parts:
         placement = p.placement or 8
-        if p.primary_trait:
-            add(decks[p.primary_trait], placement)
-        for a in (p.augments or []):
-            add(augments[a], placement)
+        deck = deck_archetype(p.traits)
+        if deck:
+            add(decks[deck], placement)
         for u in (p.units or []):
             uid = u.get("id")
             if uid:
                 add(units[uid], placement)
+            for item in (u.get("items") or []):
+                if _is_real_item(item):
+                    add(items[item], placement)
 
     min_n = settings.min_sample_size
     return {
         "matches": len({p.match_id for p in parts}),
         "participants": len(parts),
         "decks": _finalize(decks, names.clean_trait, min_n, 10),
-        "augments": _finalize(augments, names.clean_augment, min_n, 15),
+        "item_ranking": _finalize(items, names.clean_item, min_n, 15),
         "units": _finalize(units, names.clean_unit, min_n, 15),
     }

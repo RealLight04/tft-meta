@@ -98,10 +98,13 @@ def lookup_summoner(riot_id: str) -> dict:
                 "placement": me.get("placement"),
                 "deck": names.clean_trait(trait) if trait else "-",
                 "units": [
-                    {"name": names.clean_unit(u.get("character_id")), "tier": u.get("tier")}
+                    {
+                        "name": names.clean_unit(u.get("character_id")),
+                        "tier": u.get("tier"),
+                        "item_list": [names.clean_item(it) for it in (u.get("itemNames") or [])],
+                    }
                     for u in me.get("units", [])
                 ],
-                "augments": [names.clean_augment(a) for a in me.get("augments", [])],
             })
 
         avg = round(sum(g["placement"] for g in games) / len(games), 2) if games else None

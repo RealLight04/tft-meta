@@ -30,14 +30,12 @@
       <div class="deck-label">{{ g.deck }}</div>
       <div class="units">
         {% for u in g.units %}
-          <span class="unit t{{ u.tier }}">{{ u.name }}{% if u.tier %} {{ u.tier }}★{% endif %}</span>
+          <span class="unit t{{ u.tier }}"
+                {% if u.item_list %}title="{{ u.item_list | join(', ') }}"{% endif %}>
+            {{ u.name }}{% if u.tier %} {{ u.tier }}★{% endif %}{% if u.item_list %} <em>+{{ u.item_list|length }}</em>{% endif %}
+          </span>
         {% endfor %}
       </div>
-      {% if g.augments %}
-      <div class="augs">
-        {% for a in g.augments %}<span class="aug">{{ a }}</span>{% endfor %}
-      </div>
-      {% endif %}
     </div>
   </div>
   {% endfor %}
