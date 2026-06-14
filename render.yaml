@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tft-meta
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Riot API 키는 대시보드에서 직접 입력 (코드/깃에 노출 금지)
+      - key: RIOT_API_KEY
+        sync: false
+      # 무료 플랜은 디스크가 임시라 자동 수집은 기본 꺼둠
+      - key: ENABLE_SCHEDULER
+        value: "false"
+      # 로컬에서 3.14 관련 이슈가 있어 배포는 안정적인 3.12로 고정
+      - key: PYTHON_VERSION
+        value: "3.12.7"

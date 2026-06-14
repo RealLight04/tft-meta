@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -29,6 +29,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="TFT 메타 분석", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
+# Riot 개발자 포털의 사이트 소유권 인증 토큰.
+# Riot이 https://(배포주소)/riot.txt 를 읽어 이 값과 대조한다.
+RIOT_VERIFICATION_TOKEN = "9d4ca169-2c15-49c9-bb29-e4d2330532ff"
+
+
+@app.get("/riot.txt", response_class=PlainTextResponse)
+def riot_txt():
+    return RIOT_VERIFICATION_TOKEN
 
 
 @app.get("/", response_class=HTMLResponse)
