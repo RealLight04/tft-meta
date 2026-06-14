@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TFT 메타{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="/">TFT 메타 <span>KR</span></a>
+      <nav>
+        <a href="/">메타</a>
+        <a href="/summoner">전적 검색</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>데이터 출처: Riot Games API · 상위 티어(챌린저/그마/마스터) 기준 · 비공식 서비스</p>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

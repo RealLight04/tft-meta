@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}TFT 메타 · 현재 패치{% endblock %}
+
+{% block content %}
+{% if not data or data.matches == 0 %}
+  <div class="empty">
+    <h1>아직 수집된 데이터가 없습니다</h1>
+    <p>아래 명령으로 데이터를 수집하면 현재 패치 메타가 표시됩니다.</p>
+    <code>python -m scripts.collect</code>
+  </div>
+{% else %}
+  <section class="hero">
+    <h1>현재 패치 메타 <span class="patch">{{ patch }}</span></h1>
+    <p>{{ data.matches }}게임 · 표본 {{ data.participants }}개 분석 결과</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>메타 덱 TOP 10</h2>
+      <small>주력 특성 기준 · 평균 등수 낮은 순</small>
+    </div>
+    <div class="chart-wrap"><canvas id="deckChart"></canvas></div>
+    <table>
+      <thead>
+        <tr><th>#</th><th>덱 (주력 특성)</th><th>표본</th><th>평균 등수</th><th>순방률</th><th>1등률</th></tr>
+      </thead>
+      <tbody>
+        {% for d in data.decks %}
+        <tr>
+          <td class="rank">{{ loop.index }}</td>
+          <td class="name">{{ d.name }}</td>
+          <td>{{ d.count }}</td>
+          <td class="avg">{{ d.avg }}</td>
+          <td>{{ d.top4_rate }}%</td>
+          <td>{{ d.win_rate }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if not data.decks %}<p class="note">표본이 부족합니다. 데이터를 더 수집해 주세요.</p>{% endif %}
+  </section>
+
+  <div class="grid2">
+    <section class="card">
+      <div class="card-head"><h2>증강 랭킹</h2><small>평균 등수 낮은 순</small></div>
+      <table>
+        <thead><tr><th>#</th><th>증강</th><th>표본</th><th>평균</th><th>순방률</th></tr></thead>
+        <tbody>
+          {% for a in data.augments %}
+          <tr>
+            <td class="rank">{{ loop.index }}</td>
+            <td class="name">{{ a.name }}</td>
+            <td>{{ a.count }}</td>
+            <td class="avg">{{ a.avg }}</td>
+            <td>{{ a.top4_rate }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>챔피언 랭킹</h2><small>평균 등수 낮은 순</small></div>
+      <table>
+        <thead><tr><th>#</th><th>챔피언</th><th>표본</th><th>평균</th><th>순방률</th></tr></thead>
+        <tbody>
+          {% for u in data.units %}
+          <tr>
+            <td class="rank">{{ loop.index }}</td>
+            <td class="name">{{ u.name }}</td>
+            <td>{{ u.count }}</td>
+            <td class="avg">{{ u.avg }}</td>
+            <td>{{ u.top4_rate }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if data and data.decks %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const decks = {{ data.decks | tojson }};
+  const ctx = document.getElementById('deckChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: decks.map(d => d.name),
+      datasets: [{
+        label: '순방률 (%)',
+        data: decks.map(d => d.top4_rate),
+        backgroundColor: '#5b8def',
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { min: 0, max: 100, ticks: { color: '#9aa4b2' }, grid: { color: '#222831' } },
+        y: { ticks: { color: '#e6e9ef' }, grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

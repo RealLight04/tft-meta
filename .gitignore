@@ -1,0 +1,16 @@
+# 환경변수 (API 키 절대 커밋 금지)
+.env
+
+# 파이썬
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 가상환경 / 로컬 의존성
+.venv/
+venv/
+.deps/
+
+# 데이터베이스
+*.db
+*.sqlite3
